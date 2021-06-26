@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:helpaway/const.dart';
 
 class Button1 extends StatelessWidget {
   final Color color;
@@ -47,5 +48,25 @@ class Button2 extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class MiniButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+        height: 30,
+        width: 110,
+        child: Center(
+          child: Text(
+            "location",
+            style: Theme.of(context)
+                .textTheme
+                .bodyText2
+                .copyWith(fontWeight: FontWeight.w700, fontSize: 17),
+          ),
+        ),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20), color: darkBrown1));
   }
 }

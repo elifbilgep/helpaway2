@@ -13,3 +13,21 @@ const Color white2 = Color(0xffFBFBFB);
 // image places in directory
 
 const signInImg = "assets/images/cute_kid_eating_bg.jpg";
+
+// list of images categories
+
+const List mainCategories = [
+  "kids_eating_bg.jpg",
+  "eating_house.jpg",
+  "clothes.jpg",
+  "market.jpg",
+  "care_house.jpg"
+];
+
+const List mainCategoryNames = [
+  "Restaurants",
+  "Eating House",
+  "Clothes",
+  "Market",
+  "Care House"
+];

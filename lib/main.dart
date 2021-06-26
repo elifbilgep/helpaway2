@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:helpaway/View/Pages/consumer_home.dart';
+import 'package:helpaway/View/Pages/location_food.dart';
 import 'package:helpaway/const.dart';
 
-import 'View/Pages/SıgnIn.dart';
+import 'View/Pages/sıgnIn.dart';
 
 void main() => runApp(MyApp());
 
@@ -34,6 +36,16 @@ class MyApp extends StatelessWidget {
               textStyle: TextStyle(
                   color: darkBrown2, fontSize: 20, fontWeight: FontWeight.w600),
             ),
+            headline5: GoogleFonts.josefinSans(
+              //profile headlines
+              textStyle: TextStyle(
+                  color: darkBrown2, fontSize: 23, fontWeight: FontWeight.w800),
+            ),
+            headline6: GoogleFonts.josefinSans(
+              //profile headlines
+              textStyle: TextStyle(
+                  color: white1, fontSize: 20, fontWeight: FontWeight.w800),
+            ),
             bodyText1: GoogleFonts.josefinSans(
               //button dark
               textStyle: TextStyle(
@@ -48,7 +60,7 @@ class MyApp extends StatelessWidget {
             )),
         primaryColor: darkBrown1,
       ),
-      home: SignIn(),
+      home: Location(),
     );
   }
 }
