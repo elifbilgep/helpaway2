@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:helpaway/View/Components/touchBar.dart';
 import 'package:helpaway/const.dart';
@@ -12,7 +13,22 @@ class Location extends StatefulWidget {
 double _originLatitude = 38.43828143103933;
 double _originLongitude = 27.14136619613852;
 
+double _destLatitude = 38.422733197746986;
+double _destLongitude = 27.129490953156576;
+
 class _LocationState extends State<Location> {
+  @override
+  void initState() {
+    super.initState();
+    setCustomMarker();
+    _getPolyline();
+  }
+
+  PolylinePoints polylinePoints = PolylinePoints();
+  Map<PolylineId, Polyline> polylines = {};
+
+  BitmapDescriptor customIcon;
+
   final PanelController _pc = PanelController();
   bool detailed = false;
   GoogleMapController _controller;
@@ -35,51 +51,12 @@ class _LocationState extends State<Location> {
     ));
   }
 
-  Widget googleMap() {
-    return GoogleMap(
-      myLocationButtonEnabled: true,
-      mapType: MapType.normal,
-      initialCameraPosition: _initalCameraPosition,
-      tiltGesturesEnabled: true,
-      compassEnabled: true,
-      scrollGesturesEnabled: true,
-      zoomGesturesEnabled: true,
-      markers: _cretaeMarker(),
-      onMapCreated: (GoogleMapController controller) {
-        _controller = controller;
-      },
-    );
-  }
-
   getPanel() {
     if (detailed) {
       return detailedPlace();
     } else {
       return placeCard();
     }
-  }
-
-  Set<Marker> _cretaeMarker() {
-    return <Marker>[
-      Marker(
-          infoWindow: InfoWindow(title: "Destination"),
-          markerId: MarkerId("asdasd"),
-          position: _initalCameraPosition.target,
-          icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueCyan)),
-      Marker(
-          infoWindow: InfoWindow(title: "Konak Pier"),
-          markerId: MarkerId("asdasdd"),
-          position: LatLng(38.392300, 27.047840),
-          icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure)),
-      Marker(
-          infoWindow: InfoWindow(title: "You"),
-          markerId: MarkerId("asdsasdd"),
-          position: LatLng(38.422733197746986, 27.129490953156576),
-          icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure)),
-    ].toSet();
   }
 
   placeCard() {
@@ -209,5 +186,79 @@ class _LocationState extends State<Location> {
         )
       ],
     );
+  }
+
+  Widget googleMap() {
+    return GoogleMap(
+      markers: _cretaeMarker(),
+      polylines: Set<Polyline>.of(polylines.values),
+      myLocationButtonEnabled: true,
+      mapType: MapType.normal,
+      initialCameraPosition: _initalCameraPosition,
+      tiltGesturesEnabled: true,
+      compassEnabled: true,
+      scrollGesturesEnabled: true,
+      zoomGesturesEnabled: true,
+      onMapCreated: (GoogleMapController controller) {
+        _controller = controller;
+      },
+    );
+  }
+
+  Set<Marker> _cretaeMarker() {
+    return <Marker>[
+      Marker(
+          infoWindow: InfoWindow(title: "Destination"),
+          markerId: MarkerId("asdasd"),
+          position: _initalCameraPosition.target,
+          icon: customIcon),
+      Marker(
+          infoWindow: InfoWindow(title: "Konak Pier"),
+          markerId: MarkerId("asdasdd"),
+          position: LatLng(38.392300, 27.047840),
+          icon:
+              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure)),
+      Marker(
+          infoWindow: InfoWindow(title: "You"),
+          markerId: MarkerId("asdsasdd"),
+          position: LatLng(38.422733197746986, 27.129490953156576),
+          icon: customIcon),
+    ].toSet();
+  }
+
+  void setCustomMarker() async {
+    customIcon = await BitmapDescriptor.fromAssetImage(
+        ImageConfiguration(size: Size(50, 50)), "assets/images/location.png");
+  }
+
+  void _getPolyline() async {
+    List<LatLng> polylineCoordinates = [];
+
+    PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
+      "AIzaSyAeZ57ZGRaPD-u6N9CtBeTkC1P_5iwYYqU",
+      PointLatLng(_originLatitude, _originLongitude),
+      PointLatLng(_destLatitude, _destLongitude),
+      travelMode: TravelMode.walking,
+    );
+    if (result.points.isNotEmpty) {
+      result.points.forEach((PointLatLng point) {
+        polylineCoordinates.add(LatLng(point.latitude, point.longitude));
+      });
+    } else {
+      print(result.errorMessage);
+    }
+    _addPolyLine(polylineCoordinates);
+  }
+
+  _addPolyLine(List<LatLng> polylineCoordinates) {
+    PolylineId id = PolylineId("poly");
+    Polyline polyline = Polyline(
+      polylineId: id,
+      color: Colors.blue,
+      points: polylineCoordinates,
+      width: 8,
+    );
+    polylines[id] = polyline;
+    setState(() {});
   }
 }

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "146525919658",
+    "project_id": "helpaway",
+    "storage_bucket": "helpaway.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:146525919658:android:a502ad0c28118225dbf3d3",
+        "android_client_info": {
+          "package_name": "com.example.helpaway"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "146525919658-vfq626c15kfgqruble2pu6bpa1l0kn08.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.helpaway",
+            "certificate_hash": "b09cedb3842065683efe9be0bbf76b80b8f57088"
+          }
+        },
+        {
+          "client_id": "146525919658-fbi27s97h3dbrk3ns24be85tl72db47g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsy2EzSDXrWaU7CgvyeWl98RbnyMxblK4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "146525919658-fbi27s97h3dbrk3ns24be85tl72db47g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

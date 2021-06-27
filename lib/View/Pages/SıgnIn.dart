@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:helpaway/Models/owner.dart';
+import 'package:helpaway/Services/Auth.dart';
+import 'package:helpaway/Services/Firestore_service.dart';
 import 'package:helpaway/View/Components/bigHeader.dart';
 import 'package:helpaway/View/Components/button.dart';
 import 'package:helpaway/View/Components/logo.dart';
@@ -6,6 +9,7 @@ import 'package:helpaway/View/Components/touchBar.dart';
 import 'package:helpaway/View/Components/upload_pic.dart';
 import 'package:helpaway/View/Pages/consumer_home.dart';
 import 'package:helpaway/const.dart';
+import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class SignIn extends StatefulWidget {
@@ -14,6 +18,12 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
+  final _formKey = GlobalKey<FormState>();
+  String takenPlaceName;
+  String takenEmail;
+  String takenPassword;
+  String takenCategory;
+
   PanelController _pc = new PanelController();
   String dropdownValue = 'Restaurant';
   bool isOwner = false;
@@ -93,76 +103,87 @@ class _SignInState extends State<SignIn> {
             Container(
               height: 300,
               width: 300,
-              child: Column(
-                children: [
-                  TextFormField(
-                    decoration: InputDecoration(
-                        hintText: "place name",
-                        hintStyle:
-                            Theme.of(context).textTheme.bodyText1.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                        prefixIcon: Icon(
-                          Icons.text_fields,
-                          color: darkBrown1,
-                        )),
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(
-                        hintText: "email",
-                        hintStyle:
-                            Theme.of(context).textTheme.bodyText1.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                        prefixIcon: Icon(
-                          Icons.mail,
-                          color: darkBrown1,
-                        )),
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(
-                        hintText: "password",
-                        hintStyle:
-                            Theme.of(context).textTheme.bodyText1.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                        prefixIcon: Icon(
-                          Icons.lock,
-                          color: darkBrown1,
-                        )),
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        "Choose your category:",
-                        style: Theme.of(context)
-                            .textTheme
-                            .headline3
-                            .copyWith(color: darkBrown1, fontSize: 20),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    TextFormField(
+                      onSaved: (newValue) => takenPlaceName = newValue,
+                      decoration: InputDecoration(
+                          hintText: "place name",
+                          hintStyle:
+                              Theme.of(context).textTheme.bodyText1.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                          prefixIcon: Icon(
+                            Icons.text_fields,
+                            color: darkBrown1,
+                          )),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    TextFormField(
+                      onSaved: (newValue) => takenEmail = newValue,
+                      decoration: InputDecoration(
+                          hintText: "email",
+                          hintStyle:
+                              Theme.of(context).textTheme.bodyText1.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                          prefixIcon: Icon(
+                            Icons.mail,
+                            color: darkBrown1,
+                          )),
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    TextFormField(
+                      onSaved: (newValue) => takenPassword = newValue,
+                      decoration: InputDecoration(
+                          hintText: "password",
+                          hintStyle:
+                              Theme.of(context).textTheme.bodyText1.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                          prefixIcon: Icon(
+                            Icons.lock,
+                            color: darkBrown1,
+                          )),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          "Choose your category:",
+                          style: Theme.of(context)
+                              .textTheme
+                              .headline3
+                              .copyWith(color: darkBrown1, fontSize: 20),
+                        ),
+                        SizedBox(
+                          width: 10,
+                        ),
+                        buildDropdownButton(),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 15,
+                    ),
+                    InkWell(
+                      onTap: () {
+                        signUp();
+                      },
+                      child: Button1(
+                        text: "Sign up",
+                        color: darkBrown1,
                       ),
-                      SizedBox(
-                        width: 10,
-                      ),
-                      buildDropdownButton(),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 15,
-                  ),
-                  Button1(
-                    text: "Sign up",
-                    color: darkBrown1,
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -186,6 +207,7 @@ class _SignInState extends State<SignIn> {
         setState(() {
           dropdownValue = newValue;
         });
+        takenCategory = newValue;
       },
       items: <String>['Restaurant', 'Market', 'Care House', 'Eating House']
           .map<DropdownMenuItem<String>>((String value) {
@@ -362,5 +384,26 @@ class _SignInState extends State<SignIn> {
         ),
       ),
     );
+  }
+
+  void signUp() async {
+    debugPrint("tıklandı");
+    final _authService = Provider.of<Authorization>(context, listen: false);
+    _formKey.currentState.save();
+    try {
+      Owner owner =
+          await _authService.createUserWithMail(takenEmail, takenPassword);
+      if (owner != null) {
+        await FirestoreService().createOwner(
+            email: takenEmail,
+            id: owner.id,
+            latidude: "null, yet..",
+            longitude: "null, yet..",
+            placeCategory: takenCategory,
+            placeName: takenPlaceName);
+      }
+    } catch (error) {
+      print("ERROR: " + error.toString());
+    }
   }
 }

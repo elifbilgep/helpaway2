@@ -31,3 +31,9 @@ const List mainCategoryNames = [
   "Market",
   "Care House"
 ];
+
+const apiKey = "AIzaSyAeZ57ZGRaPD-u6N9CtBeTkC1P_5iwYYqU";
+
+// food category names
+
+const List foodCategory = ["Main Course", "Dessert", "Grains", "Soup"];
