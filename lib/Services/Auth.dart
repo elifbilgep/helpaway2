@@ -30,3 +30,4 @@ class Authorization {
     return _firebaseAuth.signOut();
   }
 }
+

@@ -1,16 +1,20 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:helpaway/Models/owner.dart';
-import 'package:helpaway/Services/Auth.dart';
-import 'package:helpaway/Services/Firestore_service.dart';
-import 'package:helpaway/View/Components/bigHeader.dart';
-import 'package:helpaway/View/Components/button.dart';
-import 'package:helpaway/View/Components/logo.dart';
-import 'package:helpaway/View/Components/touchBar.dart';
-import 'package:helpaway/View/Components/upload_pic.dart';
-import 'package:helpaway/View/Pages/consumer_home.dart';
-import 'package:helpaway/const.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
+
+import '../../Models/owner.dart';
+import '../../Services/Auth.dart';
+import '../../Services/Firestore_service.dart';
+import '../../const.dart';
+import '../Components/bigHeader.dart';
+import '../Components/button.dart';
+import '../Components/logo.dart';
+import '../Components/touchBar.dart';
+import 'consumer_home.dart';
 
 class SignIn extends StatefulWidget {
   @override
@@ -18,11 +22,26 @@ class SignIn extends StatefulWidget {
 }
 
 class _SignInState extends State<SignIn> {
+  File _imageFile;
+  String imgUrl;
+
+  final picker = ImagePicker();
+
+  Position _currentPosition;
+
   final _formKey = GlobalKey<FormState>();
+  final _formKey2 = GlobalKey<FormState>();
+
   String takenPlaceName;
   String takenEmail;
   String takenPassword;
   String takenCategory;
+  double takenLatidute;
+  double takenLongitude;
+// *****************************
+
+  String takenEmail2;
+  String takenPassword2;
 
   PanelController _pc = new PanelController();
   String dropdownValue = 'Restaurant';
@@ -80,24 +99,9 @@ class _SignInState extends State<SignIn> {
             Row(
               children: [
                 BigHeader2(
-                  padding: EdgeInsets.only(top: 20, left: 20),
+                  padding: EdgeInsets.only(top: 20, left: 10),
                   text: "Create an\nAccount",
                 ),
-                Column(
-                  children: [
-                    UploadPic(),
-                    SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      "Upload picture",
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline3
-                          .copyWith(fontSize: 18),
-                    )
-                  ],
-                )
               ],
             ),
             Container(
@@ -240,92 +244,115 @@ class _SignInState extends State<SignIn> {
         Container(
           height: 350,
           width: 300,
-          child: Column(
-            children: [
-              TextFormField(
-                decoration: InputDecoration(
-                    disabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.pink)),
-                    hintText: "email",
-                    hintStyle: Theme.of(context).textTheme.bodyText1.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                    prefixIcon: Icon(
-                      Icons.mail,
-                      color: darkBrown1,
-                    )),
-              ),
-              SizedBox(
-                height: 25,
-              ),
-              TextFormField(
-                decoration: InputDecoration(
-                    disabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.pink)),
-                    hintText: "password",
-                    hintStyle: Theme.of(context).textTheme.bodyText1.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                    prefixIcon: Icon(
-                      Icons.lock,
-                      color: darkBrown1,
-                    )),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Align(
-                alignment: Alignment.topRight,
-                child: Text(
-                  "Forgot password?",
-                  style: Theme.of(context)
-                      .textTheme
-                      .bodyText1
-                      .copyWith(fontWeight: FontWeight.w900, fontSize: 17),
+          child: Form(
+            key: _formKey2,
+            child: Column(
+              children: [
+                TextFormField(
+                  onSaved: (newValue) => takenEmail2 = newValue,
+                  decoration: InputDecoration(
+                      disabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.pink)),
+                      hintText: "email",
+                      hintStyle: Theme.of(context).textTheme.bodyText1.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                      prefixIcon: Icon(
+                        Icons.mail,
+                        color: darkBrown1,
+                      )),
                 ),
-              ),
-              SizedBox(
-                height: 40,
-              ),
-              Button1(
-                text: "Sign in",
-                color: darkBrown1,
-              ),
-              Center(
-                  child: Column(
-                children: [
-                  SizedBox(
-                    height: 10,
+                SizedBox(
+                  height: 25,
+                ),
+                TextFormField(
+                  onSaved: (newValue) => takenPassword2 = newValue,
+                  decoration: InputDecoration(
+                      disabledBorder: UnderlineInputBorder(
+                          borderSide: BorderSide(color: Colors.pink)),
+                      hintText: "password",
+                      hintStyle: Theme.of(context).textTheme.bodyText1.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                      prefixIcon: Icon(
+                        Icons.lock,
+                        color: darkBrown1,
+                      )),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Text(
+                    "Forgot password?",
+                    style: Theme.of(context)
+                        .textTheme
+                        .bodyText1
+                        .copyWith(fontWeight: FontWeight.w900, fontSize: 17),
                   ),
-                  Text(
-                    "or",
-                    style: Theme.of(context).textTheme.bodyText1,
+                ),
+                SizedBox(
+                  height: 40,
+                ),
+                InkWell(
+                  onTap: () {
+                    return signInAcc();
+                  },
+                  child: Container(
+                    width: 280,
+                    height: 50,
+                    decoration: BoxDecoration(
+                        color: darkBrown1,
+                        borderRadius: BorderRadius.circular(50)),
+                    child: Center(
+                      child: Text(
+                        "Sign in",
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyText2
+                            .copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        isOwnerAndSignUp = true;
-                      });
-                    },
-                    child: GestureDetector(
+                ),
+                Center(
+                    child: Column(
+                  children: [
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Text(
+                      "or",
+                      style: Theme.of(context).textTheme.bodyText1,
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    GestureDetector(
                       onTap: () {
                         setState(() {
                           isOwnerAndSignUp = true;
                         });
                       },
-                      child: Text(
-                        "Sign up",
-                        style: Theme.of(context).textTheme.headline4.copyWith(
-                            fontWeight: FontWeight.w900, color: darkBrown1),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            isOwnerAndSignUp = true;
+                            _getCurrentLocation();
+                          });
+                        },
+                        child: Text(
+                          "Sign up",
+                          style: Theme.of(context).textTheme.headline4.copyWith(
+                              fontWeight: FontWeight.w900, color: darkBrown1),
+                        ),
                       ),
-                    ),
-                  )
-                ],
-              ))
-            ],
+                    )
+                  ],
+                ))
+              ],
+            ),
           ),
         )
       ],
@@ -386,24 +413,50 @@ class _SignInState extends State<SignIn> {
     );
   }
 
+  _getCurrentLocation() {
+    Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.best,
+            forceAndroidLocationManager: true)
+        .then((Position position) {
+      setState(() {
+        _currentPosition = position;
+      });
+    }).catchError((e) {
+      print(e);
+    });
+  }
+
   void signUp() async {
     debugPrint("tıklandı");
     final _authService = Provider.of<Authorization>(context, listen: false);
     _formKey.currentState.save();
+    if (_currentPosition != null) {
+      takenLatidute = _currentPosition.latitude;
+      takenLongitude = _currentPosition.longitude;
+    }
+
+    Owner owner =
+        await _authService.createUserWithMail(takenEmail, takenPassword);
+    if (owner != null) {
+      await FirestoreService().createOwner(
+        email: takenEmail,
+        id: owner.id,
+        latitude: takenLatidute,
+        longitude: takenLongitude,
+        placeCategory: takenCategory,
+        placeName: takenPlaceName,
+      );
+    }
+  }
+
+  void signInAcc() async {
+    debugPrint("TIKLANDI");
+    final _authService = Provider.of<Authorization>(context, listen: false);
+    _formKey2.currentState.save();
     try {
-      Owner owner =
-          await _authService.createUserWithMail(takenEmail, takenPassword);
-      if (owner != null) {
-        await FirestoreService().createOwner(
-            email: takenEmail,
-            id: owner.id,
-            latidude: "null, yet..",
-            longitude: "null, yet..",
-            placeCategory: takenCategory,
-            placeName: takenPlaceName);
-      }
+      await _authService.signInWithMail(takenEmail2, takenPassword2);
     } catch (error) {
-      print("ERROR: " + error.toString());
+      print("error" + error.toString());
     }
   }
 }

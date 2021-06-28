@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:helpaway/Services/Auth.dart';
-import 'package:helpaway/View/Pages/owner_page.dart';
-import 'package:helpaway/View/Pages/s%C4%B1gnIn.dart';
 import 'package:provider/provider.dart';
 
 import '../Models/owner.dart';
+import '../View/Pages/owner_page.dart';
+import '../View/Pages/s%C4%B1gnIn.dart';
 import '../const.dart';
+import 'Auth.dart';
 
 
 class Redirecting extends StatefulWidget {

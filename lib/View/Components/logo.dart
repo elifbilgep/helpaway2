@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:helpaway/const.dart';
+import '../../const.dart';
 
 class Logo extends StatelessWidget {
   @override
@@ -9,17 +9,11 @@ class Logo extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.only(left: 20.0),
         child: Container(
-          height: 100,
-          width: 100,
+          height: 80,
+          width: 80,
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20), color: darkBrown1),
-          child: Center(
-            child: Text(
-              "Logo",
-              style:
-                  Theme.of(context).textTheme.bodyText2.copyWith(fontSize: 25),
-            ),
-          ),
+          child: Image.asset("assets/images/logo.png"),
         ),
       ),
     );

@@ -1,8 +1,14 @@
 import 'package:eva_icons_flutter/eva_icons_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:helpaway/Services/Auth.dart';
-import 'package:helpaway/View/Components/button.dart';
-import 'package:helpaway/const.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:provider/provider.dart';
+
+import '../../Models/owner.dart';
+import '../../Models/restaurantItem.dart';
+import '../../Services/Auth.dart';
+import '../../Services/Firestore_service.dart';
+import '../../const.dart';
+import '../Components/button.dart';
 
 class OwnerPage extends StatefulWidget {
   @override
@@ -10,13 +16,36 @@ class OwnerPage extends StatefulWidget {
 }
 
 class _OwnerPageState extends State<OwnerPage> {
+  List<RestaurantItem> foods;
+  String _currentAddress;
+  Owner owner;
+  var activeUserId;
   int choosenIndex;
-
+  String takenFoodCategory;
+  String takenFoodName;
+  String takenAvailable;
+  final _formKey = GlobalKey<FormState>();
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   Widget build(BuildContext context) {
+    activeUserId = Provider.of<Authorization>(context).activeUserId;
     return DefaultTabController(
-      length: 2,
-      child: Scaffold(
+        length: 2,
+        child: FutureBuilder(
+          future: FirestoreService().bringUser(activeUserId),
+          builder: (context, snapshot) {
+            if (!snapshot.hasData) {
+              return Center(child: CircularProgressIndicator());
+            }
+            owner = snapshot.data;
+            _getAddressFromLatLng();
+            return buildScaffold(context);
+          },
+        ));
+  }
+
+  Scaffold buildScaffold(BuildContext context) {
+    return Scaffold(
         resizeToAvoidBottomInset: false,
         drawer: buildDrawer(context),
         appBar: AppBar(
@@ -34,13 +63,15 @@ class _OwnerPageState extends State<OwnerPage> {
             ],
           ),
         ),
-        body: TabBarView(
-          children: [
-            myItems(),
-            addItem(context),
-          ],
-        ),
-      ),
+        body: buildTabBarView(context));
+  }
+
+  TabBarView buildTabBarView(BuildContext context) {
+    return TabBarView(
+      children: [
+        myItems(),
+        addItem(context),
+      ],
     );
   }
 
@@ -54,16 +85,10 @@ class _OwnerPageState extends State<OwnerPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "William Restaurant",
+                  owner.placeName,
                   style: Theme.of(context).textTheme.headline2,
                 ),
-                Text(
-                  "Mr. Wiston Smith 27 Victoria Street, Hounslow,Middle ",
-                  style: Theme.of(context)
-                      .textTheme
-                      .headline2
-                      .copyWith(fontSize: 12),
-                )
+                if (_currentAddress != null) Text(_currentAddress)
               ],
             ),
             decoration: BoxDecoration(color: white1),
@@ -85,6 +110,19 @@ class _OwnerPageState extends State<OwnerPage> {
   }
 
   myItems() {
+    return FutureBuilder(
+      future: FirestoreService().bringOwnerFoods(activeUserId),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+        foods = snapshot.data;
+        return buildStack();
+      },
+    );
+  }
+
+  Stack buildStack() {
     return Stack(
       children: [
         Container(
@@ -96,87 +134,90 @@ class _OwnerPageState extends State<OwnerPage> {
                   "assets/images/owner_bg.jpg",
                   fit: BoxFit.cover,
                 ))),
-        Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
-              child: Container(
-                height: 150,
-                width: 350,
-                decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                          color: Colors.grey.shade700,
-                          blurRadius: 5,
-                          spreadRadius: 2)
-                    ],
-                    borderRadius: BorderRadius.circular(10)),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 20,
-                    ),
-                    Container(
-                      height: 100,
-                      width: 130,
-                      child: Image.asset(
-                        "assets/images/main_course.png",
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    SizedBox(
-                      width: 5,
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        SizedBox(),
-                        Text(
-                          "Chicken Breast",
-                          style: Theme.of(context).textTheme.headline5,
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          "William Restaurant",
-                          style: Theme.of(context).textTheme.headline6.copyWith(
-                              color: Colors.grey.shade400,
-                              fontWeight: FontWeight.w700),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              "Avaiable until: ",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headline6
-                                  .copyWith(
-                                      color: Colors.grey.shade400,
-                                      fontWeight: FontWeight.w700),
-                            ),
-                            Text(
-                              "22.00",
-                              style: Theme.of(context).textTheme.headline3,
-                            )
-                          ],
-                        ),
-                        SizedBox(
-                          height: 10,
-                        ),
+        ListView.builder(
+            itemCount: foods.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.only(left: 20, right: 20, top: 10),
+                child: Container(
+                  height: 150,
+                  width: 350,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.grey.shade700,
+                            blurRadius: 5,
+                            spreadRadius: 2)
                       ],
-                    )
-                  ],
+                      borderRadius: BorderRadius.circular(10)),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 20,
+                      ),
+                      Container(
+                        height: 90,
+                        width: 130,
+                        child: Image.asset(
+                          "assets/images/${foods[index].foodCategory}.png",
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox(),
+                          Text(
+                            foods[index].foodName,
+                            style: Theme.of(context).textTheme.headline5,
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Text(
+                            owner.placeName,
+                            style: Theme.of(context)
+                                .textTheme
+                                .headline6
+                                .copyWith(
+                                    color: Colors.grey.shade400,
+                                    fontWeight: FontWeight.w700),
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                "Avaiable until: ",
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headline6
+                                    .copyWith(
+                                        color: Colors.grey.shade400,
+                                        fontWeight: FontWeight.w700),
+                              ),
+                              Text(
+                                foods[index].availableUntil,
+                                style: Theme.of(context).textTheme.headline3,
+                              )
+                            ],
+                          ),
+                          SizedBox(
+                            height: 10,
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
                 ),
-              ),
-            )
-          ],
-        )
+              );
+            })
       ],
     );
   }
@@ -260,6 +301,8 @@ class _OwnerPageState extends State<OwnerPage> {
                                   setState(() {
                                     choosenIndex = index;
                                   });
+                                  takenFoodCategory =
+                                      foodCategory[choosenIndex];
                                 },
                                 child: Container(
                                   child: Center(
@@ -285,45 +328,56 @@ class _OwnerPageState extends State<OwnerPage> {
                               );
                             }),
                       ),
-                      TextFormField(
-                        cursorColor: darkBrown1,
-                        decoration: InputDecoration(
-                            hintText: "Food name",
-                            hintStyle: Theme.of(context).textTheme.headline3,
-                            prefixIcon: Icon(
-                              Icons.text_fields,
-                              color: darkBrown1,
-                            )),
-                      ),
-                      SizedBox(
-                        height: 20,
-                      ),
-                      Row(
-                        children: [
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Icon(
-                            EvaIcons.clock,
-                            color: darkBrown1,
-                          ),
-                          SizedBox(
-                            width: 10,
-                          ),
-                          Text("Available until:    ",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headline3
-                                  .copyWith(fontWeight: FontWeight.w900)),
-                          Container(
-                            width: 100,
-                            height: 30,
-                            child: TextFormField(
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            TextFormField(
+                              onSaved: (newValue) => takenFoodName = newValue,
                               cursorColor: darkBrown1,
-                              decoration: InputDecoration(),
+                              decoration: InputDecoration(
+                                  hintText: "Food name",
+                                  hintStyle:
+                                      Theme.of(context).textTheme.headline3,
+                                  prefixIcon: Icon(
+                                    Icons.text_fields,
+                                    color: darkBrown1,
+                                  )),
                             ),
-                          )
-                        ],
+                            SizedBox(
+                              height: 20,
+                            ),
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Icon(
+                                  EvaIcons.clock,
+                                  color: darkBrown1,
+                                ),
+                                SizedBox(
+                                  width: 10,
+                                ),
+                                Text("Available until:    ",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headline3
+                                        .copyWith(fontWeight: FontWeight.w900)),
+                                Container(
+                                  width: 100,
+                                  height: 30,
+                                  child: TextFormField(
+                                    onSaved: (newValue) =>
+                                        takenAvailable = newValue,
+                                    cursorColor: darkBrown1,
+                                    decoration: InputDecoration(),
+                                  ),
+                                )
+                              ],
+                            )
+                          ],
+                        ),
                       )
                     ],
                   ),
@@ -333,13 +387,52 @@ class _OwnerPageState extends State<OwnerPage> {
             SizedBox(
               height: 15,
             ),
-            Button1(
-              color: darkBrown1,
-              text: "Add Item",
+            InkWell(
+              onTap: () {
+                createItem();
+              },
+              child: Button1(
+                color: darkBrown1,
+                text: "Add Item",
+              ),
             )
           ],
         ),
       ],
     );
+  }
+
+  void createItem() async {
+    var activeUserId =
+        Provider.of<Authorization>(context, listen: false).activeUserId;
+    _formKey.currentState.save();
+    await FirestoreService().createFoodItem(
+      availableUntil: takenAvailable,
+      foodCategory: takenFoodCategory,
+      foodName: takenFoodName,
+      publisherId: activeUserId,
+      longitude: owner.longitude,
+      latitude: owner.latitude,
+      restaurantName: owner.placeName,
+    );
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text("Item added succesfully.")));
+  }
+
+  _getAddressFromLatLng() async {
+    try {
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(owner.latitude, owner.longitude);
+
+      Placemark place = placemarks[0];
+
+      setState(() {
+        _currentAddress =
+            "${place.locality}, ${place.postalCode}, ${place.country}";
+      });
+    } catch (e) {
+      print(e);
+    }
   }
 }

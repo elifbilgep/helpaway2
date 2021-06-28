@@ -4,15 +4,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 class Owner {
   final String email;
   final String id;
-  final bool langitude;
-  final bool longitude;
+  final double latitude;
+  final double longitude;
   final String placeName;
   final String placeCategory;
 
   Owner(
       {this.email,
       this.id,
-      this.langitude,
+      this.latitude,
       this.longitude,
       this.placeName,
       this.placeCategory});
@@ -24,10 +24,10 @@ class Owner {
   factory Owner.createFromDoc(DocumentSnapshot doc) {
     return Owner(
       id: doc.id,
-      langitude: doc.get("langitude"),
+      latitude: doc.get("latitude"),
       longitude: doc.get("longitude"),
       placeCategory: doc.get("placeCategory"),
-      placeName: doc.get("placeName")
+      placeName: doc.get("placeName"),
     );
   }
 }

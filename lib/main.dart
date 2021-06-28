@@ -1,12 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:helpaway/Services/Auth.dart';
-import 'package:helpaway/Services/Redirecting.dart';
-import 'package:helpaway/const.dart';
 import 'package:provider/provider.dart';
 
-import 'View/Pages/sıgnIn.dart';
+import 'Services/Auth.dart';
+import 'Services/Redirecting.dart';
+import 'const.dart';
+
+
 
 void main() async{
    WidgetsFlutterBinding.ensureInitialized();

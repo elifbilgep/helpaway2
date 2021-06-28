@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:helpaway/const.dart';
+
+import '../../const.dart';
 
 class Button1 extends StatelessWidget {
   final Color color;

@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:helpaway/View/Components/button.dart';
-import 'package:helpaway/const.dart';
+import 'package:provider/provider.dart';
+
+import '../../Models/restaurantItem.dart';
+import '../../Services/Auth.dart';
+import '../../Services/Firestore_service.dart';
+import '../../const.dart';
+import 'location_food.dart';
 
 class ConsumerHome extends StatelessWidget {
+  var activeUserId;
+  List<RestaurantItem> foods;
   @override
   Widget build(BuildContext context) {
+    activeUserId =
+        Provider.of<Authorization>(context, listen: false).activeUserId;
     return Scaffold(
       backgroundColor: white2,
       body: Padding(
@@ -143,83 +152,76 @@ class ConsumerHome extends StatelessWidget {
   }
 
   buildList(BuildContext context) {
-    return Column(
-      children: [
-        Align(
-          alignment: Alignment.topLeft,
-          child: Padding(
-            padding: const EdgeInsets.only(left: 25.0),
-            child: Text(
-              "Restaurants",
-              style: Theme.of(context).textTheme.headline5,
+    return FutureBuilder(
+      future: FirestoreService().bringAllFoods(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Center(child: CircularProgressIndicator());
+        }
+        foods = snapshot.data;
+        return Column(
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: const EdgeInsets.only(left: 25.0),
+                child: Text(
+                  "Restaurants",
+                  style: Theme.of(context).textTheme.headline5,
+                ),
+              ),
             ),
-          ),
-        ),
-        Container(
-          height: MediaQuery.of(context).size.height - 453,
-          child: ListView.builder(
-              itemCount: 1,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding:
-                      const EdgeInsets.only(bottom: 20, left: 20, right: 20),
-                  child: Container(
-                    height: 160,
-                    width: 350,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.grey.shade300,
-                              blurRadius: 5,
-                              spreadRadius: 2)
-                        ],
-                        borderRadius: BorderRadius.circular(10)),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 20,
-                        ),
-                        Container(
-                          height: 100,
-                          width: 130,
-                          child: Image.asset(
-                            "assets/images/main_course.png",
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+            Container(
+              height: MediaQuery.of(context).size.height - 453,
+              child: ListView.builder(
+                  itemCount: foods.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
+                      padding: const EdgeInsets.only(
+                          bottom: 20, left: 20, right: 20),
+                      child: Container(
+                        height: 160,
+                        width: 350,
+                        decoration: BoxDecoration(
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                  color: Colors.grey.shade300,
+                                  blurRadius: 5,
+                                  spreadRadius: 2)
+                            ],
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Row(
                           children: [
                             SizedBox(
-                              height: 20,
+                              width: 20,
                             ),
-                            Text(
-                              "Chicken Breast",
-                              style: Theme.of(context).textTheme.headline5,
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Text(
-                              "William Restaurant",
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headline6
-                                  .copyWith(
-                                      color: Colors.grey.shade400,
-                                      fontWeight: FontWeight.w700),
+                            Container(
+                              height: 90,
+                              width: 130,
+                              child: Image.asset(
+                                "assets/images/${foods[index].foodCategory}.png",
+                                fit: BoxFit.cover,
+                              ),
                             ),
                             SizedBox(
-                              height: 5,
+                              width: 15,
                             ),
-                            Row(
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
+                                SizedBox(
+                                  height: 20,
+                                ),
                                 Text(
-                                  "Avaiable until: ",
+                                  foods[index].foodName,
+                                  style: Theme.of(context).textTheme.headline5,
+                                ),
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Text(
+                                  foods[index].restaurantName,
                                   style: Theme.of(context)
                                       .textTheme
                                       .headline6
@@ -227,25 +229,67 @@ class ConsumerHome extends StatelessWidget {
                                           color: Colors.grey.shade400,
                                           fontWeight: FontWeight.w700),
                                 ),
-                                Text(
-                                  "22.00",
-                                  style: Theme.of(context).textTheme.headline3,
-                                )
+                                SizedBox(
+                                  height: 5,
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      "Avaiable until: ",
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headline6
+                                          .copyWith(
+                                              color: Colors.grey.shade400,
+                                              fontWeight: FontWeight.w700),
+                                    ),
+                                    Text(
+                                      "22.00",
+                                      style:
+                                          Theme.of(context).textTheme.headline3,
+                                    )
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                InkWell(
+                                    onTap: () {
+                                      return Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  LocationPage()));
+                                    },
+                                    child: Container(
+                                        height: 30,
+                                        width: 110,
+                                        child: Center(
+                                          child: Text(
+                                            "location",
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyText2
+                                                .copyWith(
+                                                    fontWeight: FontWeight.w700,
+                                                    fontSize: 17),
+                                          ),
+                                        ),
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(20),
+                                            color: darkBrown1)))
                               ],
-                            ),
-                            SizedBox(
-                              height: 10,
-                            ),
-                            MiniButton()
+                            )
                           ],
-                        )
-                      ],
-                    ),
-                  ),
-                );
-              }),
-        ),
-      ],
+                        ),
+                      ),
+                    );
+                  }),
+            ),
+          ],
+        );
+      },
     );
   }
 }

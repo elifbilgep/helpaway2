@@ -1,27 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:helpaway/View/Components/touchBar.dart';
-import 'package:helpaway/const.dart';
+import '../Components/touchBar.dart';
+import '../../const.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
-class Location extends StatefulWidget {
+class LocationPage extends StatefulWidget {
+
+
+  
   @override
-  _LocationState createState() => _LocationState();
+  _LocationPageState createState() => _LocationPageState();
 }
 
-double _originLatitude = 38.43828143103933;
-double _originLongitude = 27.14136619613852;
+double _originLatitude = 37.421998333333335;
+double _originLongitude = -122.084;
 
-double _destLatitude = 38.422733197746986;
-double _destLongitude = 27.129490953156576;
+double _destLatitude = 37.40858141498359;
+double _destLongitude = -122.07795124544703;
 
-class _LocationState extends State<Location> {
+class _LocationPageState extends State<LocationPage> {
   @override
   void initState() {
     super.initState();
     setCustomMarker();
     _getPolyline();
+
   }
 
   PolylinePoints polylinePoints = PolylinePoints();
@@ -32,7 +36,7 @@ class _LocationState extends State<Location> {
   final PanelController _pc = PanelController();
   bool detailed = false;
   GoogleMapController _controller;
-  static final CameraPosition _initalCameraPosition = CameraPosition(
+  CameraPosition _initalCameraPosition = CameraPosition(
     target: LatLng(_originLatitude, _originLongitude),
     zoom: 15,
   );
@@ -208,20 +212,14 @@ class _LocationState extends State<Location> {
   Set<Marker> _cretaeMarker() {
     return <Marker>[
       Marker(
-          infoWindow: InfoWindow(title: "Destination"),
+          infoWindow: InfoWindow(title: "You"),
           markerId: MarkerId("asdasd"),
           position: _initalCameraPosition.target,
-          icon: customIcon),
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed)),
       Marker(
           infoWindow: InfoWindow(title: "Konak Pier"),
           markerId: MarkerId("asdasdd"),
-          position: LatLng(38.392300, 27.047840),
-          icon:
-              BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure)),
-      Marker(
-          infoWindow: InfoWindow(title: "You"),
-          markerId: MarkerId("asdsasdd"),
-          position: LatLng(38.422733197746986, 27.129490953156576),
+          position: LatLng(37.40858141498359, -122.07795124544703),
           icon: customIcon),
     ].toSet();
   }
@@ -237,7 +235,7 @@ class _LocationState extends State<Location> {
     PolylineResult result = await polylinePoints.getRouteBetweenCoordinates(
       "AIzaSyAeZ57ZGRaPD-u6N9CtBeTkC1P_5iwYYqU",
       PointLatLng(_originLatitude, _originLongitude),
-      PointLatLng(_destLatitude, _destLongitude),
+      PointLatLng(37.40858141498359, -122.07795124544703),
       travelMode: TravelMode.walking,
     );
     if (result.points.isNotEmpty) {
