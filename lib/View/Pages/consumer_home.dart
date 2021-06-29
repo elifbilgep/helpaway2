@@ -235,7 +235,7 @@ class ConsumerHome extends StatelessWidget {
                                 Row(
                                   children: [
                                     Text(
-                                      "Avaiable until: ",
+                                      "Available until: ",
                                       style: Theme.of(context)
                                           .textTheme
                                           .headline6

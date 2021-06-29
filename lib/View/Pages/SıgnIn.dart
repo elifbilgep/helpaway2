@@ -99,7 +99,7 @@ class _SignInState extends State<SignIn> {
             Row(
               children: [
                 BigHeader2(
-                  padding: EdgeInsets.only(top: 20, left: 10),
+                  padding: EdgeInsets.only(top: 20, left: 30),
                   text: "Create an\nAccount",
                 ),
               ],
@@ -112,6 +112,7 @@ class _SignInState extends State<SignIn> {
                 child: Column(
                   children: [
                     TextFormField(
+                      cursorColor: darkBrown1,
                       onSaved: (newValue) => takenPlaceName = newValue,
                       decoration: InputDecoration(
                           hintText: "place name",
@@ -128,6 +129,7 @@ class _SignInState extends State<SignIn> {
                       height: 15,
                     ),
                     TextFormField(
+                      cursorColor: darkBrown1,
                       onSaved: (newValue) => takenEmail = newValue,
                       decoration: InputDecoration(
                           hintText: "email",
@@ -144,6 +146,7 @@ class _SignInState extends State<SignIn> {
                       height: 15,
                     ),
                     TextFormField(
+                      cursorColor: darkBrown1,
                       onSaved: (newValue) => takenPassword = newValue,
                       decoration: InputDecoration(
                           hintText: "password",
@@ -213,8 +216,13 @@ class _SignInState extends State<SignIn> {
         });
         takenCategory = newValue;
       },
-      items: <String>['Restaurant', 'Market', 'Care House', 'Eating House']
-          .map<DropdownMenuItem<String>>((String value) {
+      items: <String>[
+        'Restaurant',
+        'Market',
+        'Care House',
+        'Eating House',
+        'Clothes'
+      ].map<DropdownMenuItem<String>>((String value) {
         return DropdownMenuItem<String>(
           value: value,
           child: Text(value),
@@ -239,7 +247,7 @@ class _SignInState extends State<SignIn> {
         ),
         BigHeader2(
           text: "Welcome",
-          padding: EdgeInsets.only(top: 20, right: 70),
+          padding: EdgeInsets.only(top: 40, right: 70),
         ),
         Container(
           height: 350,

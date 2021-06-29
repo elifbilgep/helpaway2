@@ -6,9 +6,6 @@ import '../../const.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 class LocationPage extends StatefulWidget {
-
-
-  
   @override
   _LocationPageState createState() => _LocationPageState();
 }
@@ -25,7 +22,6 @@ class _LocationPageState extends State<LocationPage> {
     super.initState();
     setCustomMarker();
     _getPolyline();
-
   }
 
   PolylinePoints polylinePoints = PolylinePoints();
@@ -101,7 +97,7 @@ class _LocationPageState extends State<LocationPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "William Restaurant",
+                  "Aykut Kokorec",
                   style: Theme.of(context)
                       .textTheme
                       .headline5
@@ -111,27 +107,16 @@ class _LocationPageState extends State<LocationPage> {
                   height: 10,
                 ),
                 Text(
-                  "Mr. Wiston Smith 27 \nVictoria Street, Hounslow, Middle ",
+                  "Mountain View, 94043,\nUnited States ",
                   style: Theme.of(context)
                       .textTheme
                       .headline3
-                      .copyWith(fontSize: 17),
+                      .copyWith(fontSize: 20),
                 ),
               ],
             ),
             SizedBox(
               width: 10,
-            ),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(20),
-              child: Container(
-                height: 70,
-                width: 120,
-                child: Image.asset(
-                  "assets/images/restaurant.jpg",
-                  fit: BoxFit.cover,
-                ),
-              ),
             ),
           ],
         )
